@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>gitTrack | Activity</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="activity">
+    <div class="site-shell">
+      <header class="topbar">
+        <a class="brand" href="./index.html">
+          <span class="brand-mark">gt</span>
+          <span>gitTrack</span>
+        </a>
+
+        <nav class="navbar">
+          <a class="nav-link" href="./index.html">Dashboard</a>
+          <a class="nav-link active" href="./activity.html">Activity</a>
+        </nav>
+
+        <div class="topbar-actions">
+          <button id="loginButton" class="primary">Sign in with GitHub</button>
+          <button id="syncButton" class="primary hidden">Sync data</button>
+          <button id="logoutButton" class="ghost hidden">Sign out</button>
+        </div>
+      </header>
+
+      <main class="page-shell">
+        <section class="panel activity-header">
+          <div>
+            <p class="eyebrow">Deep View</p>
+            <h1>Repository activity</h1>
+            <p id="statusMessage" class="status idle">Checking sign-in status.</p>
+          </div>
+
+          <div class="activity-header-tools">
+            <div class="filter-bar">
+              <label class="field inline-field wide-field">
+                <span>Repository</span>
+                <select id="repoPicker"></select>
+              </label>
+              <label class="field inline-field">
+                <span>From</span>
+                <input id="dateFrom" type="date" />
+              </label>
+              <label class="field inline-field">
+                <span>To</span>
+                <input id="dateTo" type="date" />
+              </label>
+              <button id="clearDateFilters" class="ghost">Clear dates</button>
+            </div>
+            <div id="exportPanel" class="button-row hidden">
+              <button id="clearButton" class="ghost">Clear saved data</button>
+              <button id="exportAllJson" class="ghost">All data JSON</button>
+              <button id="exportAllCsv" class="ghost">Summary CSV</button>
+              <button id="exportRepoJson" class="ghost">Repo JSON</button>
+              <button id="exportRepoCsv" class="ghost">Commit CSV</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="activity-layout">
+          <aside class="panel repo-sidebar">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Repository Context</p>
+                <h2 id="detailTitle">Select a repository</h2>
+              </div>
+              <span id="repoCount" class="muted">0 repos</span>
+            </div>
+            <p id="detailMeta" class="muted"></p>
+            <a id="detailLink" class="inline-link hidden" href="#" target="_blank" rel="noreferrer">Open on GitHub</a>
+            <div id="topicBadges" class="badge-row"></div>
+
+            <div class="summary-grid single-column">
+              <article class="summary-chip">
+                <span>Issues</span>
+                <strong id="detailIssueCount">0</strong>
+              </article>
+              <article class="summary-chip">
+                <span>Open PRs</span>
+                <strong id="detailOpenPrCount">0</strong>
+              </article>
+              <article class="summary-chip">
+                <span>Closed PRs</span>
+                <strong id="detailClosedPrCount">0</strong>
+              </article>
+              <article class="summary-chip">
+                <span>Commits fetched</span>
+                <strong id="detailCommitCount">0</strong>
+              </article>
+            </div>
+          </aside>
+
+          <section class="panel activity-main">
+            <div id="detailPlaceholder" class="empty-state tall">
+              Select a synced repository to review activity and exports.
+            </div>
+
+            <div id="detailBody" class="hidden">
+              <div class="tab-row">
+                <button class="tab-button active" data-tab="timeline">Timeline</button>
+                <button class="tab-button" data-tab="issues">Issues</button>
+                <button class="tab-button" data-tab="prs">Pull Requests</button>
+                <button class="tab-button" data-tab="commits">Commits</button>
+              </div>
+
+              <section class="tab-panel active" data-panel="timeline">
+                <div class="subheading-row">
+                  <h3>Unified activity</h3>
+                  <span id="timelineCountLabel" class="subtle-count">Recent items from all sections</span>
+                </div>
+                <div id="timelineList" class="stack-list"></div>
+              </section>
+
+              <section class="tab-panel" data-panel="issues">
+                <div class="subheading-row">
+                  <h3>Issues</h3>
+                  <span id="issueCountLabel" class="subtle-count"></span>
+                </div>
+                <div id="issueList" class="stack-list"></div>
+                <div class="load-more-row">
+                  <button id="loadMoreIssues" class="ghost hidden">Load more issues</button>
+                </div>
+              </section>
+
+              <section class="tab-panel" data-panel="prs">
+                <div class="subheading-row">
+                  <h3>Pull requests</h3>
+                  <span id="prCountLabel" class="subtle-count"></span>
+                </div>
+                <div id="prList" class="stack-list"></div>
+                <div class="load-more-row">
+                  <button id="loadMorePrs" class="ghost hidden">Load more pull requests</button>
+                </div>
+              </section>
+
+              <section class="tab-panel" data-panel="commits">
+                <div class="subheading-row">
+                  <h3>Commits</h3>
+                  <span id="commitCountLabel" class="subtle-count"></span>
+                </div>
+                <div id="commitList" class="stack-list"></div>
+                <div class="load-more-row">
+                  <button id="loadMoreCommits" class="ghost hidden">Load more commits</button>
+                </div>
+              </section>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>
