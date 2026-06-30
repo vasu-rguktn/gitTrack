@@ -54,8 +54,10 @@ SESSION_SECRET=replace-with-a-long-random-string
 GITHUB_CLIENT_ID=your_github_oauth_app_client_id
 GITHUB_CLIENT_SECRET=your_github_oauth_app_client_secret
 GITHUB_REDIRECT_URI=http://localhost:4173/auth/github/callback
-MAX_REPOS=25
-MAX_ITEMS=15
+MAX_REPOS=40
+MAX_ACTIVITY_ITEMS=20
+CACHE_TTL_MS=300000
+SESSION_MAX_AGE_MS=28800000
 ```
 
 ## Run locally

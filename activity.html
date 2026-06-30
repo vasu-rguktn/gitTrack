@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>gitTrack | Activity</title>
+    <title>gitTrack | Repository Details</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -22,12 +22,12 @@
 
         <nav class="navbar">
           <a class="nav-link" href="./index.html">Dashboard</a>
-          <a class="nav-link active" href="./activity.html">Activity</a>
+          <a class="nav-link active" href="./activity.html">Repository Details</a>
         </nav>
 
         <div class="topbar-actions">
           <button id="loginButton" class="primary">Sign in with GitHub</button>
-          <button id="syncButton" class="primary hidden">Sync data</button>
+          <button id="syncButton" class="primary hidden">Refresh data</button>
           <button id="logoutButton" class="ghost hidden">Sign out</button>
         </div>
       </header>
@@ -36,7 +36,7 @@
         <section class="panel activity-header">
           <div>
             <p class="eyebrow">Deep View</p>
-            <h1>Repository activity</h1>
+            <h1>Repository detail workspace</h1>
             <p id="statusMessage" class="status idle">Checking sign-in status.</p>
           </div>
 
@@ -54,7 +54,11 @@
                 <span>To</span>
                 <input id="dateTo" type="date" />
               </label>
+              <button id="applyDateFilters" class="primary" type="button">Apply range</button>
               <button id="clearDateFilters" class="ghost">Clear dates</button>
+            </div>
+            <div class="filter-feedback">
+              <p id="dateRangeSummary" class="muted">Showing all available activity for the selected repository.</p>
             </div>
             <div id="exportPanel" class="button-row hidden">
               <button id="clearButton" class="ghost">Clear saved data</button>
@@ -81,7 +85,15 @@
 
             <div class="summary-grid single-column">
               <article class="summary-chip">
-                <span>Issues</span>
+                <span>Commits today</span>
+                <strong id="detailCommitToday">0</strong>
+              </article>
+              <article class="summary-chip">
+                <span>Commits this week</span>
+                <strong id="detailCommitCount">0</strong>
+              </article>
+              <article class="summary-chip">
+                <span>Open issues</span>
                 <strong id="detailIssueCount">0</strong>
               </article>
               <article class="summary-chip">
@@ -89,30 +101,64 @@
                 <strong id="detailOpenPrCount">0</strong>
               </article>
               <article class="summary-chip">
-                <span>Closed PRs</span>
-                <strong id="detailClosedPrCount">0</strong>
+                <span>Merge conflicts</span>
+                <strong id="detailConflictCount">0</strong>
               </article>
               <article class="summary-chip">
-                <span>Commits fetched</span>
-                <strong id="detailCommitCount">0</strong>
+                <span>Latest workflow</span>
+                <strong id="detailWorkflowStatus">unknown</strong>
               </article>
             </div>
           </aside>
 
           <section class="panel activity-main">
             <div id="detailPlaceholder" class="empty-state tall">
-              Select a synced repository to review activity and exports.
+              Select a synced repository to review commits, issues, workflow status, and recent activity.
             </div>
 
             <div id="detailBody" class="hidden">
               <div class="tab-row">
-                <button class="tab-button active" data-tab="timeline">Timeline</button>
+                <button class="tab-button active" data-tab="overview">Overview</button>
+                <button class="tab-button" data-tab="timeline">Timeline</button>
                 <button class="tab-button" data-tab="issues">Issues</button>
                 <button class="tab-button" data-tab="prs">Pull Requests</button>
                 <button class="tab-button" data-tab="commits">Commits</button>
               </div>
 
-              <section class="tab-panel active" data-panel="timeline">
+              <section class="tab-panel active" data-panel="overview">
+                <div class="overview-grid">
+                  <section class="snapshot-block">
+                    <div class="subheading-row">
+                      <h3>Repository health</h3>
+                      <span id="riskBadge" class="subtle-count"></span>
+                    </div>
+                    <div id="riskList" class="stack-list compact-list"></div>
+                  </section>
+
+                  <section class="snapshot-block">
+                    <div class="subheading-row">
+                      <h3>Top contributors</h3>
+                    </div>
+                    <div id="contributorList" class="stack-list compact-list"></div>
+                  </section>
+
+                  <section class="snapshot-block">
+                    <div class="subheading-row">
+                      <h3>Branches</h3>
+                    </div>
+                    <div id="branchList" class="stack-list compact-list"></div>
+                  </section>
+
+                  <section class="snapshot-block">
+                    <div class="subheading-row">
+                      <h3>Workflow runs</h3>
+                    </div>
+                    <div id="workflowList" class="stack-list compact-list"></div>
+                  </section>
+                </div>
+              </section>
+
+              <section class="tab-panel" data-panel="timeline">
                 <div class="subheading-row">
                   <h3>Unified activity</h3>
                   <span id="timelineCountLabel" class="subtle-count">Recent items from all sections</span>

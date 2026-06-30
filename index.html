@@ -22,12 +22,12 @@
 
         <nav class="navbar">
           <a class="nav-link active" href="./index.html">Dashboard</a>
-          <a class="nav-link" href="./activity.html">Activity</a>
+          <a class="nav-link" href="./activity.html">Repository Details</a>
         </nav>
 
         <div class="topbar-actions">
           <button id="loginButton" class="primary">Sign in with GitHub</button>
-          <button id="syncButton" class="primary hidden">Sync data</button>
+          <button id="syncButton" class="primary hidden">Refresh data</button>
           <button id="logoutButton" class="ghost hidden">Sign out</button>
         </div>
       </header>
@@ -35,16 +35,17 @@
       <main class="page-shell">
         <section class="hero-card panel">
           <div>
-            <p class="eyebrow">Repository Oversight</p>
-            <h1>One base for many CommitMents</h1>
+            <p class="eyebrow">Faculty Repository Analytics</p>
+            <h1>Monitor student delivery across GitHub organizations.</h1>
             <p class="hero-copy">
-              Monitoring the Changes , Mentoring the Products
+              Live repository health, student activity, workflow failures, pending reviews, and inactivity signals from
+              the GitHub data your account can access.
             </p>
           </div>
           <div class="hero-side">
             <div id="authSignedOut" class="auth-box">
               <h2>Connect GitHub</h2>
-              <p class="muted">Use your GitHub.</p>
+              <p class="muted">OAuth scopes: repo, read:org, read:user, workflow.</p>
             </div>
             <div id="authSignedIn" class="auth-box hidden">
               <div class="profile-row">
@@ -54,49 +55,101 @@
                   <p id="userLogin" class="muted"></p>
                 </div>
               </div>
-              <p class="muted">Use the activity page for full issue, PR, commit, and export views.</p>
+              <div class="badge-row profile-meta">
+                <span id="connectedOrgsBadge" class="badge">0 orgs</span>
+                <span id="trackedReposBadge" class="badge">0 repos</span>
+                <span id="lastSyncBadge" class="badge">Not synced</span>
+              </div>
             </div>
             <p id="statusMessage" class="status idle">Checking sign-in status.</p>
           </div>
         </section>
 
-        <section class="metrics-grid">
+        <section id="summaryGrid" class="metrics-grid metrics-grid-extended">
           <article class="metric-card panel accent-card">
-            <span>Total repos</span>
+            <span>Total repositories</span>
             <strong id="metricRepos">0</strong>
-            <small>Accessible through your account</small>
+            <small>Repositories visible to the signed-in user</small>
           </article>
           <article class="metric-card panel">
             <span>Open issues</span>
             <strong id="metricIssues">0</strong>
-            <small>Visible across tracked repositories</small>
+            <small>Current backlog across synced repositories</small>
           </article>
           <article class="metric-card panel">
             <span>Open PRs</span>
             <strong id="metricOpenPrs">0</strong>
-            <small>Still active or awaiting review</small>
+            <small>Awaiting merge, review, or updates</small>
           </article>
           <article class="metric-card panel">
             <span>Closed PRs</span>
             <strong id="metricClosedPrs">0</strong>
-            <small>Merged or closed work</small>
+            <small>Merged or closed during the tracked window</small>
           </article>
         </section>
 
-        <section class="panel utility-bar">
-          <div class="utility-group">
-            <label class="field inline-field">
-              <span>Search repositories</span>
-              <input id="searchInput" type="search" placeholder="Search repo, owner, topic" />
+        <section id="summaryExtraCards" class="metrics-grid metrics-grid-extended"></section>
+
+        <section class="panel utility-bar utility-bar-wide">
+          <div class="utility-group utility-group-grow">
+            <label class="field inline-field wide-field">
+              <span>Universal search</span>
+              <input id="searchInput" type="search" placeholder="Repository, student, owner, issue, PR, branch, SHA" />
             </label>
           </div>
           <div class="utility-group">
             <label class="field inline-field small-field">
-              <span>Filter</span>
-              <select id="roleFilter">
-                <option value="all">All repositories</option>
-                <option value="owner">Owned by me</option>
-                <option value="collaborator">Collaborator access</option>
+              <span>Organization</span>
+              <select id="orgFilter">
+                <option value="all">All organizations</option>
+              </select>
+            </label>
+            <label class="field inline-field small-field">
+              <span>Section</span>
+              <select id="sectionFilter">
+                <option value="all">All sections</option>
+              </select>
+            </label>
+            <label class="field inline-field small-field">
+              <span>Faculty</span>
+              <select id="facultyFilter">
+                <option value="all">All faculty</option>
+              </select>
+            </label>
+            <label class="field inline-field small-field">
+              <span>Visibility</span>
+              <select id="visibilityFilter">
+                <option value="all">All visibility</option>
+                <option value="private">Private</option>
+                <option value="public">Public</option>
+              </select>
+            </label>
+            <label class="field inline-field small-field">
+              <span>Activity</span>
+              <select id="activityFilter">
+                <option value="all">All activity</option>
+                <option value="active-today">Committed today</option>
+                <option value="active-week">Active this week</option>
+                <option value="inactive-7">Inactive over 7 days</option>
+                <option value="inactive-30">Inactive over 30 days</option>
+              </select>
+            </label>
+            <label class="field inline-field small-field">
+              <span>Workflow</span>
+              <select id="workflowFilter">
+                <option value="all">All statuses</option>
+                <option value="success">Successful</option>
+                <option value="failure">Failed</option>
+                <option value="in_progress">In progress</option>
+                <option value="unknown">Unknown</option>
+              </select>
+            </label>
+            <label class="field inline-field small-field">
+              <span>Archived</span>
+              <select id="archivedFilter">
+                <option value="all">All</option>
+                <option value="active">Active repos</option>
+                <option value="archived">Archived repos</option>
               </select>
             </label>
             <label class="field inline-field small-field">
@@ -104,30 +157,34 @@
               <select id="sortFilter">
                 <option value="activity">Latest activity</option>
                 <option value="name">Repository name</option>
+                <option value="commits">Most commits this week</option>
                 <option value="issues">Most open issues</option>
-                <option value="prs">Most PRs</option>
+                <option value="prs">Most open PRs</option>
               </select>
             </label>
           </div>
         </section>
 
-        <section class="dashboard-grid">
+        <section class="dashboard-grid dashboard-grid-wide">
           <section class="panel card-panel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Repositories</p>
-                <h2>Project list</h2>
+                <p class="eyebrow">Repository Health</p>
+                <h2>Faculty overview</h2>
               </div>
               <p id="repoSummary" class="muted">No repositories loaded yet.</p>
             </div>
-            <div id="repoList" class="repo-card-grid empty-state">
-              Sign in and sync your GitHub repositories to populate this list.
+            <div id="alertRail" class="alert-rail empty-state compact-empty">
+              Sign in and refresh data to surface inactive repositories, failed workflows, and pending reviews.
+            </div>
+            <div id="repoTable" class="data-table empty-state">
+              Sync GitHub repositories to populate the analytics table.
             </div>
           </section>
 
           <section class="panel spotlight-panel">
             <div id="detailPlaceholder" class="empty-state tall">
-              Select a repository to see its summary and jump into the activity page.
+              Select a repository to see details, then jump to the repository page for deeper review.
             </div>
 
             <div id="detailBody" class="hidden">
@@ -144,30 +201,30 @@
 
               <div class="summary-grid">
                 <article class="summary-chip">
-                  <span>Issues</span>
+                  <span>Commits today</span>
+                  <strong id="detailCommitToday">0</strong>
+                </article>
+                <article class="summary-chip">
+                  <span>Commits this week</span>
+                  <strong id="detailCommitCount">0</strong>
+                </article>
+                <article class="summary-chip">
+                  <span>Open issues</span>
                   <strong id="detailIssueCount">0</strong>
                 </article>
                 <article class="summary-chip">
                   <span>Open PRs</span>
                   <strong id="detailOpenPrCount">0</strong>
                 </article>
-                <article class="summary-chip">
-                  <span>Closed PRs</span>
-                  <strong id="detailClosedPrCount">0</strong>
-                </article>
-                <article class="summary-chip">
-                  <span>Commits fetched</span>
-                  <strong id="detailCommitCount">0</strong>
-                </article>
               </div>
 
               <section class="snapshot-strip">
                 <div class="snapshot-block">
                   <div class="subheading-row">
-                    <h3>Recent issues</h3>
-                    <span id="issueCountLabel" class="subtle-count"></span>
+                    <h3>Risk signals</h3>
+                    <span id="riskBadge" class="subtle-count"></span>
                   </div>
-                  <div id="issueList" class="stack-list compact-list"></div>
+                  <div id="riskList" class="stack-list compact-list"></div>
                 </div>
 
                 <div class="snapshot-block">
@@ -177,10 +234,18 @@
                   </div>
                   <div id="prList" class="stack-list compact-list"></div>
                 </div>
+
+                <div class="snapshot-block">
+                  <div class="subheading-row">
+                    <h3>Recent commits</h3>
+                    <span id="commitCountLabel" class="subtle-count"></span>
+                  </div>
+                  <div id="commitList" class="stack-list compact-list"></div>
+                </div>
               </section>
 
               <div class="cta-row">
-                <a class="primary link-button" href="./activity.html">Open full activity page</a>
+                <a id="openActivityPage" class="primary link-button" href="./activity.html">Open repository details</a>
               </div>
             </div>
           </section>
@@ -190,41 +255,59 @@
           <section class="panel card-panel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Charts</p>
-                <h2>Repository workload</h2>
+                <p class="eyebrow">Activity</p>
+                <h2>Repositories by weekly commits</h2>
               </div>
-              <p class="muted">Open issues and PRs by repository.</p>
+              <p class="muted">Highlights which projects are moving and which need attention.</p>
             </div>
-            <div id="repoActivityChart" class="chart-panel empty-state">
-              Sync repositories to see activity charts.
-            </div>
+            <div id="repoActivityChart" class="chart-panel empty-state">Sync repositories to see activity charts.</div>
           </section>
 
           <section class="panel card-panel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Charts</p>
-                <h2>Owner distribution</h2>
+                <p class="eyebrow">Workflows</p>
+                <h2>Organization distribution</h2>
               </div>
-              <p class="muted">Repository count by owner or team lead.</p>
+              <p class="muted">Repository count grouped by organization and ownership scope.</p>
             </div>
-            <div id="ownerDistributionChart" class="chart-panel empty-state">
-              Sync repositories to see activity charts.
+            <div id="ownerDistributionChart" class="chart-panel empty-state">Sync repositories to see activity charts.</div>
+          </section>
+        </section>
+
+        <section class="split-grid">
+          <section class="panel card-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Students</p>
+                <h2>Student leaderboard</h2>
+              </div>
+              <p class="muted">Recent activity and lightweight delivery signals derived from live commit history.</p>
             </div>
+            <div id="studentList" class="stack-list empty-state">Sync repositories to compute student analytics.</div>
+          </section>
+
+          <section class="panel card-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Timeline</p>
+                <h2>Live activity feed</h2>
+              </div>
+              <p class="muted">Most recent commits, pull requests, and workflow events returned from GitHub.</p>
+            </div>
+            <div id="timelineList" class="stack-list empty-state">Sync repositories to populate the activity feed.</div>
           </section>
         </section>
 
         <section class="panel card-panel">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">Groups</p>
-              <h2>Teams and owners</h2>
+              <p class="eyebrow">Organizations</p>
+              <h2>Connected organizations</h2>
             </div>
-            <p class="muted">Grouped by repository owner so student/team repos are easier to scan.</p>
+            <p class="muted">Rollups for repository count, students, and workflow health.</p>
           </div>
-          <div id="groupList" class="group-grid empty-state">
-            Sync repositories to see grouped activity by owner or team.
-          </div>
+          <div id="groupList" class="group-grid empty-state">Sync repositories to see grouped organization activity.</div>
         </section>
       </main>
     </div>
